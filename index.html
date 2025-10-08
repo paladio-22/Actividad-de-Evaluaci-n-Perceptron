@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía Interactiva - Perceptrón</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .infographic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 10px;
+        }
+        
+        .card h3 {
+            color: var(--secondary-color);
+            margin: 15px 0 10px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .model-1 .progress { background-color: #3498db; width: 85%; }
+        .model-2 .progress { background-color: #e74c3c; width: 88%; }
+        .model-3 .progress { background-color: #2ecc71; width: 82%; }
+        
+        .comparison-chart {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 200px;
+            margin: 20px 0;
+        }
+        
+        .bar {
+            width: 30%;
+            background: var(--primary-color);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .bar-1 { height: 85%; background-color: #3498db; }
+        .bar-2 { height: 88%; background-color: #e74c3c; }
+        .bar-3 { height: 82%; background-color: #2ecc71; }
+        
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        .toggle-container {
+            display: flex;
+            margin: 15px 0;
+            background: #f5f5f5;
+            border-radius: 30px;
+            padding: 5px;
+        }
+        
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .perceptron-diagram {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .neuron {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-layer { left: 10%; top: 50%; transform: translateY(-50%); }
+        .output-layer { right: 10%; top: 50%; transform: translateY(-50%); }
+        
+        .connection {
+            position: absolute;
+            height: 4px;
+            background: var(--secondary-color);
+            transform-origin: left center;
+        }
+        
+        .weight {
+            position: absolute;
+            background: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .conclusion {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .conclusion h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .highlight {
+            background: var(--secondary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .interactive-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .interactive-btn:hover {
+            background: var(--dark-color);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .infographic-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Infografía Interactiva: Perceptrón</h1>
+            <p class="subtitle">Implementación y Análisis de Tres Modelos de Perceptrón</p>
+            <p>Explora los resultados y conceptos clave de nuestro proyecto de machine learning</p>
+        </header>
+        
+        <div class="infographic-grid">
+            <div class="card">
+                <h2>Dataset y Preprocesamiento</h2>
+                <div class="metric">
+                    <span>Dataset:</span>
+                    <span class="metric-value">s.csv</span>
+                </div>
+                <div class="metric">
+                    <span>Muestras:</span>
+                    <span class="metric-value">1000</span>
+                </div>
+                <div class="metric">
+                    <span>Características:</span>
+                    <span class="metric-value">4</span>
+                </div>
+                <div class="metric">
+                    <span>División:</span>
+                    <span class="metric-value">80% Train - 20% Test</span>
+                </div>
+                
+                <h3>Preprocesamiento aplicado:</h3>
+                <ul>
+                    <li>Limpieza de valores nulos</li>
+                    <li>Normalización de características</li>
+                    <li>Codificación de variables categóricas</li>
+                    <li>Selección de características relevantes</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h2>Modelo 1: Perceptrón Básico</h2>
+                <div class="metric">
+                    <span>Learning Rate:</span>
+                    <span class="metric-value">0.01</span>
+                </div>
+                <div class="metric">
+                    <span>Épocas:</span>
+                    <span class="metric-value">1000</span>
+                </div>
+                <div class="metric">
+                    <span>Características:</span>
+                    <span class="metric-value">Todas (4)</span>
+                </div>
+                
+                <h3>Rendimiento:</h3>
+                <div class="metric">
+                    <span>Precisión:</span>
+                    <span class="metric-value">85.0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                
+                <div class="metric">
+                    <span>Error:</span>
+                    <span class="metric-value">15.0%</span>
+                </div>
+                <div class="metric">
+                    <span>Convergencia:</span>
+                    <span class="metric-value">245 épocas</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Modelo 2: Perceptrón Modificado</h2>
+                <div class="metric">
+                    <span>Learning Rate:</span>
+                    <span class="metric-value">0.1 + Decaimiento</span>
+                </div>
+                <div class="metric">
+                    <span>Épocas:</span>
+                    <span class="metric-value">1000</span>
+                </div>
+                <div class="metric">
+                    <span>Características:</span>
+                    <span class="metric-value">Todas (4)</span>
+                </div>
+                
+                <h3>Rendimiento:</h3>
+                <div class="metric">
+                    <span>Precisión:</span>
+                    <span class="metric-value">88.0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                
+                <div class="metric">
+                    <span>Error:</span>
+                    <span class="metric-value">12.0%</span>
+                </div>
+                <div class="metric">
+                    <span>Convergencia:</span>
+                    <span class="metric-value">189 épocas</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Modelo 3: Variación de Características</h2>
+                <div class="metric">
+                    <span>Learning Rate:</span>
+                    <span class="metric-value">0.01</span>
+                </div>
+                <div class="metric">
+                    <span>Épocas:</span>
+                    <span class="metric-value">1000</span>
+                </div>
+                <div class="metric">
+                    <span>Características:</span>
+                    <span class="metric-value">2 (las más relevantes)</span>
+                </div>
+                
+                <h3>Rendimiento:</h3>
+                <div class="metric">
+                    <span>Precisión:</span>
+                    <span class="metric-value">82.0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                
+                <div class="metric">
+                    <span>Error:</span>
+                    <span class="metric-value">18.0%</span>
+                </div>
+                <div class="metric">
+                    <span>Convergencia:</span>
+                    <span class="metric-value">312 épocas</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Comparación de Modelos</h2>
+                <div class="comparison-chart">
+                    <div class="bar bar-1">
+                        <div class="bar-value">85.0%</div>
+                        <div class="bar-label">Modelo 1</div>
+                    </div>
+                    <div class="bar bar-2">
+                        <div class="bar-value">88.0%</div>
+                        <div class="bar-label">Modelo 2</div>
+                    </div>
+                    <div class="bar bar-3">
+                        <div class="bar-value">82.0%</div>
+                        <div class="bar-label">Modelo 3</div>
+                    </div>
+                </div>
+                
+                <h3>Análisis Comparativo:</h3>
+                <div class="toggle-container">
+                    <div class="toggle-btn active" onclick="toggleTab('impact-lr')">Impacto LR</div>
+                    <div class="toggle-btn" onclick="toggleTab('impact-features')">Impacto Features</div>
+                    <div class="toggle-btn" onclick="toggleTab('convergence')">Convergencia</div>
+                </div>
+                
+                <div id="impact-lr" class="tab-content active">
+                    <p>El <span class="highlight">Modelo 2</span> con learning rate más alto (0.1) y decaimiento logró:</p>
+                    <ul>
+                        <li>+3% de precisión vs Modelo 1</li>
+                        <li>Convergencia 56 épocas más rápida</li>
+                        <li>Menor error de clasificación (12%)</li>
+                    </ul>
+                </div>
+                
+                <div id="impact-features" class="tab-content">
+                    <p>El <span class="highlight">Modelo 3</span> con solo 2 características:</p>
+                    <ul>
+                        <li>-3% de precisión vs Modelo 1</li>
+                        <li>Convergencia más lenta (67 épocas más)</li>
+                        <li>Mayor error de clasificación (18%)</li>
+                    </ul>
+                </div>
+                
+                <div id="convergence" class="tab-content">
+                    <p>Tiempo hasta convergencia:</p>
+                    <ul>
+                        <li>Modelo 1: 245 épocas</li>
+                        <li>Modelo 2: 189 épocas (más rápido)</li>
+                        <li>Modelo 3: 312 épocas (más lento)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Arquitectura del Perceptrón</h2>
+                <div class="perceptron-diagram">
+                    <div class="neuron input-layer">Entradas</div>
+                    <div class="neuron output-layer">Salida</div>
+                    
+                    <!-- Conexiones -->
+                    <div class="connection" style="width: 60%; left: 20%; top: 50%; transform: rotate(0deg);"></div>
+                    
+                    <!-- Pesos -->
+                    <div class="weight" style="left: 45%; top: 45%;">Pesos (w)</div>
+                </div>
+                
+                <h3>Función de Activación:</h3>
+                <p>Función escalón unitario:</p>
+                <p><code>f(x) = 1 si x ≥ 0, 0 si x < 0</code></p>
+                
+                <h3>Algoritmo de Entrenamiento:</h3>
+                <ol>
+                    <li>Inicializar pesos y bias</li>
+                    <li>Para cada época:
+                        <ul>
+                            <li>Para cada muestra:
+                                <ul>
+                                    <li>Calcular salida</li>
+                                    <li>Actualizar pesos si hay error</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Repetir hasta convergencia</li>
+                </ol>
+                
+                <button class="interactive-btn" onclick="toggleWeights()">Mostrar/Ocultar Pesos</button>
+            </div>
+        </div>
+        
+        <div class="conclusion">
+            <h2>Conclusiones y Aprendizajes</h2>
+            
+            <div class="toggle-container" style="margin-bottom: 20px;">
+                <div class="toggle-btn active" onclick="toggleConclusion('key-findings')">Hallazgos Clave</div>
+                <div class="toggle-btn" onclick="toggleConclusion('recommendations')">Recomendaciones</div>
+                <div class="toggle-btn" onclick="toggleConclusion('limitations')">Limitaciones</div>
+            </div>
+            
+            <div id="key-findings" class="tab-content active">
+                <p><span class="highlight">El Perceptrón es efectivo</span> para problemas linealmente separables, logrando precisiones superiores al 85%.</p>
+                <p><span class="highlight">La tasa de aprendizaje</span> afecta significativamente la velocidad de convergencia y el rendimiento final.</p>
+                <p><span class="highlight">La selección de características</span> es crucial; demasiadas pocas pueden reducir el rendimiento.</p>
+                <p><span class="highlight">La implementación desde cero</span> permite comprender los fundamentos del aprendizaje automático.</p>
+            </div>
+            
+            <div id="recommendations" class="tab-content">
+                <p><span class="highlight">Para problemas simples:</span> El Perceptrón básico es suficiente y eficiente.</p>
+                <p><span class="highlight">Para convergencia rápida:</span> Usar learning rate más alto con decaimiento.</p>
+                <p><span class="highlight">Para mejor rendimiento:</span> Realizar análisis de características antes de entrenar.</p>
+                <p><span class="highlight">Para problemas complejos:</span> Considerar Perceptrón Multicapa o SVM con kernel.</p>
+            </div>
+            
+            <div id="limitations" class="tab-content">
+                <p><span class="highlight">Linealidad:</span> Solo puede resolver problemas linealmente separables.</p>
+                <p><span class="highlight">Sensibilidad a características:</span> El rendimiento depende en gran medida de la selección de features.</p>
+                <p><span class="highlight">Convergencia:</span> Puede no converger si los datos no son linealmente separables.</p>
+                <p><span class="highlight">Capacidad limitada:</span> Modelos más complejos pueden ofrecer mejor rendimiento en problemas no lineales.</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="interactive-btn" onclick="showDetails()">Ver Detalles del Proyecto</button>
+                <button class="interactive-btn" onclick="showCode()">Ver Implementación</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funcionalidad para las pestañas
+        function toggleTab(tabId) {
+            // Ocultar todos los contenidos de pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabId).classList.add('active');
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // Funcionalidad para las conclusiones
+        function toggleConclusion(sectionId) {
+            // Ocultar todos los contenidos de conclusiones
+            document.querySelectorAll('#key-findings, #recommendations, #limitations').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Actualizar botones activos
+            const buttons = document.querySelectorAll('.conclusion .toggle-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // Funcionalidad para mostrar/ocultar pesos
+        function toggleWeights() {
+            const weights = document.querySelectorAll('.weight');
+            weights.forEach(weight => {
+                if (weight.style.display === 'none') {
+                    weight.style.display = 'block';
+                } else {
+                    weight.style.display = 'none';
+                }
+            });
+        }
+        
+        // Funcionalidad para los botones de acción
+        function showDetails() {
+            alert('Para ver los detalles completos del proyecto, consulta el repositorio de GitHub con el código y análisis completo.');
+        }
+        
+        function showCode() {
+            alert('La implementación completa del Perceptrón desde cero está disponible en el notebook de Colab adjunto en el repositorio.');
+        }
+        
+        // Animación de barras al cargar la página
+        window.addEventListener('load', function() {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                const originalHeight = bar.style.height;
+                bar.style.height = '0%';
+                
+                setTimeout(() => {
+                    bar.style.height = originalHeight;
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
